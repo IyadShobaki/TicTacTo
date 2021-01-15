@@ -1,0 +1,58 @@
+﻿
+<div class="game-container">
+    <div class="game-header">
+        <div class="header-turn">@_gameManager.Player's turn</div>
+        <div class="header-status">@_gameStatus</div>
+        <button type="button" class="header-restart" @onclick="HandleOnRestartClick">
+            <i class="material-icons">refresh</i>
+        </button>
+    </div>
+    <div class="board">
+
+        @for (int i = 0; i < 9; i++)
+        {
+            var boardTitleCss = "board-title";
+            var number = i;
+            if (_winnerCombination != null && _winnerCombination.Contains(i))
+            {
+                boardTitleCss = "board-title board-title-winner";
+            }
+            <div class="@boardTitleCss" @onclick="() => HandleOnBoardTitleClick(number)">@(_gameManager.Board[i] == '\0' ? ' ' : _gameManager.Board[i])</div>
+
+        }
+
+    </div>
+</div>
+@code {
+    GameManager _gameManager;
+    string _gameStatus = "In Progress";
+    int[] _winnerCombination = null;
+
+    protected override void OnInitialized()
+    {
+        _gameManager = new GameManager();
+
+    }
+    public void HandleOnBoardTitleClick(int index)
+    {
+        _gameManager.MakeMove(index);
+        if (!_gameManager.IsRunning() && _gameManager.FindWinner() != null)
+        {
+            _gameStatus = $"{_gameManager.Player} is the Winner!";
+            _winnerCombination = _gameManager.FindWinner();
+            StateHasChanged();
+
+        }
+        else if (!_gameManager.IsRunning())
+        {
+            _gameStatus = "It's a tie!";
+        }
+    }
+    public void HandleOnRestartClick()
+    {
+        _winnerCombination = null;
+        _gameStatus = "In Progress";
+        _gameManager = new GameManager();
+        //_gameManager.RestartGame();
+    }
+}
